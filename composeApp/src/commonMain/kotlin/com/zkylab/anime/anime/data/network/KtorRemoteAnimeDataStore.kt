@@ -1,0 +1,38 @@
+package com.zkylab.anime.anime.data.network
+
+import com.zkylab.anime.core.data.safeCall
+import com.zkylab.anime.core.domain.DataError
+import com.zkylab.anime.core.domain.Result
+import com.zkylab.anime.anime.data.dto.SearchResponseDto
+import com.zkylab.anime.anime.data.dto.SearchedAnimeDto
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+
+private const val BASE_URL = "https://api.jikan.moe/v4"
+
+class KtorRemoteAnimeDataSource(
+    private val httpClient: HttpClient
+): RemoteAnimeDataSource {
+
+    override suspend fun searchAnime(
+        query: String,
+        resultLimit: Int?
+    ): Result<SearchResponseDto, DataError.Remote> {
+        return safeCall<SearchResponseDto> {
+            httpClient.get(
+                urlString = "$BASE_URL/anime"
+            ) {
+                parameter("q", query)
+            }
+        }
+    }
+
+    override suspend fun getAnimeDetails(id: String): Result<SearchedAnimeDto, DataError.Remote> {
+        return safeCall<SearchedAnimeDto> {
+            httpClient.get(
+                urlString = "$BASE_URL/anime/$id"
+            )
+        }
+    }
+}
