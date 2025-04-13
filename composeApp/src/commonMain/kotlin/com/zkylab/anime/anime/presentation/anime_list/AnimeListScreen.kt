@@ -15,6 +15,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -56,7 +57,7 @@ fun AnimeListScreenRoot(
     AnimeListScreen(
         state = state,
         onAction = { action ->
-            when(action) {
+            when (action) {
                 is AnimeListAction.OnAnimeClick -> onAnimeClick(action.anime)
                 else -> Unit
             }
@@ -71,13 +72,15 @@ fun AnimeListScreen(
     onAction: (AnimeListAction) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
     val pagerState = rememberPagerState { 2 }
     val searchResultsListState = rememberLazyListState()
     val favoriteAnimeListState = rememberLazyListState()
 
-    LaunchedEffect(state.searchResults) {
-        searchResultsListState.animateScrollToItem(0)
+    LaunchedEffect(state.searchResults, state.isNewSearch) {
+        if (state.isNewSearch) {
+            searchResultsListState.animateScrollToItem(0)
+            onAction(AnimeListAction.ClearNewSearchFlag)
+        }
     }
 
     LaunchedEffect(state.selectedTabIndex) {
@@ -89,11 +92,8 @@ fun AnimeListScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBlue)
-            .statusBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize().background(DarkBlue).statusBarsPadding()
     ) {
         AnimeSearchBar(
             searchQuery = state.searchQuery,
@@ -109,46 +109,39 @@ fun AnimeListScreen(
                 .padding(16.dp)
         )
         Surface(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
             color = DesertWhite,
-            shape = RoundedCornerShape(
-                topStart = 32.dp,
-                topEnd = 32.dp
-            )
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TabRow(
                     selectedTabIndex = state.selectedTabIndex,
-                    modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .widthIn(max = 700.dp)
-                        .fillMaxWidth(),
                     containerColor = DesertWhite,
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
                             color = SandYellow,
-                            modifier = Modifier
-                                .tabIndicatorOffset(tabPositions[state.selectedTabIndex])
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[state.selectedTabIndex])
                         )
-                    }
+                    },
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .widthIn(max = 700.dp)
+                        .fillMaxWidth()
                 ) {
                     Tab(
                         selected = state.selectedTabIndex == 0,
                         onClick = {
                             onAction(AnimeListAction.OnTabSelected(0))
                         },
-                        modifier = Modifier.weight(1f),
                         selectedContentColor = SandYellow,
-                        unselectedContentColor = Color.Black.copy(alpha = 0.5f)
+                        unselectedContentColor = Color.Black.copy(alpha = 0.5f),
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = stringResource(Res.string.search_results),
-                            modifier = Modifier
-                                .padding(vertical = 12.dp)
+                            modifier = Modifier.padding(vertical = 12.dp)
                         )
                     }
                     Tab(
@@ -156,32 +149,28 @@ fun AnimeListScreen(
                         onClick = {
                             onAction(AnimeListAction.OnTabSelected(1))
                         },
-                        modifier = Modifier.weight(1f),
                         selectedContentColor = SandYellow,
-                        unselectedContentColor = Color.Black.copy(alpha = 0.5f)
+                        unselectedContentColor = Color.Black.copy(alpha = 0.5f),
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = stringResource(Res.string.favorites),
-                            modifier = Modifier
-                                .padding(vertical = 12.dp)
+                            modifier = Modifier.padding(vertical = 12.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
+                    modifier = Modifier.fillMaxWidth().weight(1f)
                 ) { pageIndex ->
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        when(pageIndex) {
+                        when (pageIndex) {
                             0 -> {
-                                if(state.isLoading) {
+                                if (state.isLoading) {
                                     CircularProgressIndicator()
                                 } else {
                                     when {
@@ -193,6 +182,7 @@ fun AnimeListScreen(
                                                 color = MaterialTheme.colorScheme.error
                                             )
                                         }
+
                                         state.searchResults.isEmpty() -> {
                                             Text(
                                                 text = stringResource(Res.string.no_search_results),
@@ -201,21 +191,29 @@ fun AnimeListScreen(
                                                 color = MaterialTheme.colorScheme.error
                                             )
                                         }
+
                                         else -> {
                                             AnimeList(
                                                 anime = state.searchResults,
                                                 onAnimeClick = {
-                                                    onAction(AnimeListAction.OnAnimeClick(it))
+                                                    onAction(
+                                                        AnimeListAction.OnAnimeClick(
+                                                            it
+                                                        )
+                                                    )
                                                 },
+                                                scrollState = searchResultsListState,
+                                                onLoadMore = { onAction(AnimeListAction.LoadMore) },
+                                                isLoadingMore = state.isLoadingMore,
                                                 modifier = Modifier.fillMaxSize(),
-                                                scrollState = searchResultsListState
                                             )
                                         }
                                     }
                                 }
                             }
+
                             1 -> {
-                                if(state.favoriteAnime.isEmpty()) {
+                                if (state.favoriteAnime.isEmpty()) {
                                     Text(
                                         text = stringResource(Res.string.no_favorite_anime),
                                         textAlign = TextAlign.Center,

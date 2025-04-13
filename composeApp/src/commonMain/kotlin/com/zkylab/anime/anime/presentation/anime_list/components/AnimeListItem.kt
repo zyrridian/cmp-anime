@@ -60,22 +60,20 @@ fun AnimeListItem(
 ) {
     Surface(
         shape = RoundedCornerShape(32.dp),
-        modifier = modifier
-            .clickable(onClick = onClick),
-        color = LightBlue.copy(alpha = 0.2f)
+        color = LightBlue.copy(alpha = 0.2f),
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .height(IntrinsicSize.Min)
         ) {
             Box(
-                modifier = Modifier
-                    .height(100.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.height(100.dp)
             ) {
                 var imageLoadResult by remember {
                     mutableStateOf<Result<Painter>?>(null)
@@ -98,7 +96,7 @@ fun AnimeListItem(
 
                 val painterState by painter.state.collectAsStateWithLifecycle()
                 val transition by animateFloatAsState(
-                    targetValue = if(painterState is AsyncImagePainter.State.Success) {
+                    targetValue = if (painterState is AsyncImagePainter.State.Success) {
                         1f
                     } else {
                         0f
@@ -110,6 +108,7 @@ fun AnimeListItem(
                     null -> PulseAnimation(
                         modifier = Modifier.size(60.dp)
                     )
+
                     else -> {
                         Image(
                             painter = if (result.isSuccess) painter else {
@@ -158,14 +157,14 @@ fun AnimeListItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                anime.synopsis?.let { rating ->
+                anime.score?.let { rating ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-//                        Text(
-//                            text = "${round(rating * 10) / 10.0}",
-//                            style = MaterialTheme.typography.bodyMedium
-//                        )
+                        Text(
+                            text = "${round(rating * 10) / 10.0}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
@@ -177,8 +176,7 @@ fun AnimeListItem(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(36.dp)
+                modifier = Modifier.size(36.dp)
             )
         }
     }

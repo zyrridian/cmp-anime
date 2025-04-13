@@ -8,8 +8,8 @@
     <string name="no_favorite_anime">No favorite anime yet.</string>
     <string name="anime_cover">Anime cover</string>
     <string name="rating">Rating</string>
-    <string name="pages">Pages</string>
-    <string name="languages">Languages</string>
+    <string name="duration">Duration</string>
+    <string name="genre">Genre</string>
     <string name="synopsis">Synopsis</string>
     <string name="go_back">Go back</string>
     <string name="mark_as_favorite">Mark as favorite</string>

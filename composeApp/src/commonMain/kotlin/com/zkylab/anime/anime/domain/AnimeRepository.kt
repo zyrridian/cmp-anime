@@ -6,7 +6,7 @@ import com.zkylab.anime.core.domain.Result
 import kotlinx.coroutines.flow.Flow
 
 interface AnimeRepository {
-    suspend fun searchAnime(query: String): Result<List<Anime>, DataError.Remote>
+    suspend fun searchAnime(query: String, page: Int?): Result<PaginatedAnimeResult, DataError.Remote>
     suspend fun getAnimeDescription(animeId: String): Result<String?, DataError>
 
     fun getFavoriteAnime(): Flow<List<Anime>>

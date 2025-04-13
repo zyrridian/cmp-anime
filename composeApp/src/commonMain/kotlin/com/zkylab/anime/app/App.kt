@@ -70,12 +70,16 @@ fun App() {
                 }
 
                 composable<Route.AnimeDetail>(
-                    enterTransition = { slideInHorizontally { initialOffset ->
-                        initialOffset
-                    } },
-                    exitTransition = { slideOutHorizontally { initialOffset ->
-                        initialOffset
-                    } }
+                    enterTransition = {
+                        slideInHorizontally { initialOffset ->
+                            initialOffset
+                        }
+                    },
+                    exitTransition = {
+                        slideOutHorizontally { initialOffset ->
+                            initialOffset
+                        }
+                    }
                 ) {
                     val selectedBookViewModel =
                         it.sharedKoinViewModel<SelectedAnimeViewModel>(navController)
@@ -102,7 +106,7 @@ fun App() {
 
 
 @Composable
-private inline fun <reified T: ViewModel> NavBackStackEntry.sharedKoinViewModel(
+private inline fun <reified T : ViewModel> NavBackStackEntry.sharedKoinViewModel(
     navController: NavController
 ): T {
     val navGraphRoute = destination.parent?.route ?: return koinViewModel<T>()

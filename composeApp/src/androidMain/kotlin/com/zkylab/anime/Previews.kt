@@ -50,13 +50,13 @@ private val anime = (1..100).map {
     )
 }
 
-@Preview
-@Composable
-private fun BookListScreenPreview() {
-    AnimeListScreen(
-        state = AnimeListState(
-            searchResults = anime
-        ),
-        onAction = {}
-    )
-}
+//@Preview
+//@Composable
+//private fun BookListScreenPreview() {
+//    AnimeListScreen(
+//        state = AnimeListState(
+//            searchResults = anime
+//        ),
+//        onAction = {}
+//    )
+//}

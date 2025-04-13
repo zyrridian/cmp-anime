@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cmp_anime.composeapp.generated.resources.Res
 import cmp_anime.composeapp.generated.resources.description_unavailable
-import cmp_anime.composeapp.generated.resources.languages
-import cmp_anime.composeapp.generated.resources.pages
+import cmp_anime.composeapp.generated.resources.genre
+import cmp_anime.composeapp.generated.resources.duration
 import cmp_anime.composeapp.generated.resources.rating
 import cmp_anime.composeapp.generated.resources.synopsis
 import com.zkylab.anime.anime.presentation.anime_detail.components.BlurredImageBackground
@@ -127,7 +127,7 @@ private fun AnimeDetailScreen(
                     }
                     state.anime.duration?.let { pageCount ->
                         TitledContent(
-                            title = stringResource(Res.string.pages),
+                            title = stringResource(Res.string.duration),
                         ) {
                             AnimeChip {
                                 Text(text = pageCount.toString())
@@ -137,7 +137,7 @@ private fun AnimeDetailScreen(
                 }
                 if(state.anime.genres?.isNotEmpty() == true) {
                     TitledContent(
-                        title = stringResource(Res.string.languages),
+                        title = stringResource(Res.string.genre),
                         modifier = Modifier
                             .padding(vertical = 8.dp)
                     ) {
@@ -170,8 +170,8 @@ private fun AnimeDetailScreen(
                             bottom = 8.dp
                         )
                 )
-                if(state.isLoading) {
-                    CircularProgressIndicator()
+//                if(state.isLoading) {
+//                    CircularProgressIndicator()
 //                    Box(
 //                        modifier = Modifier
 //                            .fillMaxWidth()
@@ -179,7 +179,7 @@ private fun AnimeDetailScreen(
 //                        contentAlignment = Alignment.Center
 //                    ) {
 //                    }
-                } else {
+//                } else {
                     Text(
                         text = if(state.anime.synopsis.isNullOrBlank()) {
                             stringResource(Res.string.description_unavailable)
@@ -194,7 +194,7 @@ private fun AnimeDetailScreen(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
                     )
-                }
+//                }
             }
         }
     }

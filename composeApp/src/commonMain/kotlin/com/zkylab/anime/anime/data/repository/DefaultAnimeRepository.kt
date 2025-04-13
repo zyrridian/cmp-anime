@@ -7,6 +7,7 @@ import com.zkylab.anime.anime.data.mappers.toAnimeEntity
 import com.zkylab.anime.anime.data.network.RemoteAnimeDataSource
 import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.domain.AnimeRepository
+import com.zkylab.anime.anime.domain.PaginatedAnimeResult
 import com.zkylab.anime.core.domain.DataError
 import com.zkylab.anime.core.domain.EmptyResult
 import com.zkylab.anime.core.domain.Result
@@ -17,19 +18,25 @@ import kotlinx.coroutines.flow.map
 class DefaultAnimeRepository(
     private val remoteAnimeDataSource: RemoteAnimeDataSource,
     private val favoriteAnimeDao: FavoriteAnimeDao
-): AnimeRepository {
-    override suspend fun searchAnime(query: String): Result<List<Anime>, DataError.Remote> {
+) : AnimeRepository {
+    override suspend fun searchAnime(
+        query: String,
+        page: Int?
+    ): Result<PaginatedAnimeResult, DataError.Remote> {
         return remoteAnimeDataSource
-            .searchAnime(query)
+            .searchAnime(query, page)
             .map { dto ->
-                dto.data.map { it.toAnime() }
+                PaginatedAnimeResult(
+                    anime = dto.data.map { it.toAnime() },
+                    hasNextPage = dto.pagination?.hasNextPage ?: false
+                )
             }
     }
 
     override suspend fun getAnimeDescription(animeId: String): Result<String?, DataError> {
         val localResult = favoriteAnimeDao.getFavoriteAnime(animeId)
 
-        return if(localResult == null) {
+        return if (localResult == null) {
             remoteAnimeDataSource
                 .getAnimeDetails(animeId)
                 .map { it.synopsis }
@@ -58,7 +65,7 @@ class DefaultAnimeRepository(
         return try {
             favoriteAnimeDao.upsert(anime.toAnimeEntity())
             Result.Success(Unit)
-        } catch(e: SQLiteException) {
+        } catch (e: SQLiteException) {
             Result.Error(DataError.Local.DISK_FULL)
         }
     }

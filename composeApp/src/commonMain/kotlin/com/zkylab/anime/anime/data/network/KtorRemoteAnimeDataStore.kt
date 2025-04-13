@@ -17,6 +17,7 @@ class KtorRemoteAnimeDataSource(
 
     override suspend fun searchAnime(
         query: String,
+        page: Int?,
         resultLimit: Int?
     ): Result<SearchResponseDto, DataError.Remote> {
         return safeCall<SearchResponseDto> {
@@ -24,14 +25,15 @@ class KtorRemoteAnimeDataSource(
                 urlString = "$BASE_URL/anime"
             ) {
                 parameter("q", query)
+                parameter("page", page)
             }
         }
     }
 
-    override suspend fun getAnimeDetails(id: String): Result<SearchedAnimeDto, DataError.Remote> {
+    override suspend fun getAnimeDetails(animeId: String): Result<SearchedAnimeDto, DataError.Remote> {
         return safeCall<SearchedAnimeDto> {
             httpClient.get(
-                urlString = "$BASE_URL/anime/$id"
+                urlString = "$BASE_URL/anime/$animeId"
             )
         }
     }

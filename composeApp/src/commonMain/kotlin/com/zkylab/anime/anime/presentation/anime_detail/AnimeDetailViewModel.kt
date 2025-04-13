@@ -27,7 +27,7 @@ class AnimeDetailViewModel(
     private val _state = MutableStateFlow(AnimeDetailState())
     val state = _state
         .onStart {
-            fetchAnimeDescription()
+//            fetchAnimeDescription()
             observeFavoriteStatus()
         }
         .stateIn(
@@ -69,18 +69,18 @@ class AnimeDetailViewModel(
             .launchIn(viewModelScope)
     }
 
-    private fun fetchAnimeDescription() {
-        viewModelScope.launch {
-            animeRepository
-                .getAnimeDescription(animeId)
-                .onSuccess { description ->
-                    _state.update { it.copy(
-                        anime = it.anime?.copy(
-                            synopsis = description
-                        ),
-                        isLoading = false
-                    ) }
-                }
-        }
-    }
+//    private fun fetchAnimeDescription() {
+//        viewModelScope.launch {
+//            animeRepository
+//                .getAnimeDescription(animeId)
+//                .onSuccess { synopsis ->
+//                    _state.update { it.copy(
+//                        anime = it.anime?.copy(
+//                            synopsis = synopsis
+//                        ),
+//                        isLoading = false
+//                    ) }
+//                }
+//        }
+//    }
 }

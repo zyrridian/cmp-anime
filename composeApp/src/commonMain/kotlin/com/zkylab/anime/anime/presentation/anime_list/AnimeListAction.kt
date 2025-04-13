@@ -6,4 +6,6 @@ sealed interface AnimeListAction {
     data class OnSearchQueryChange(val query: String): AnimeListAction
     data class OnAnimeClick(val anime: Anime): AnimeListAction
     data class OnTabSelected(val index: Int): AnimeListAction
+    data object LoadMore : AnimeListAction
+    data object ClearNewSearchFlag : AnimeListAction
 }

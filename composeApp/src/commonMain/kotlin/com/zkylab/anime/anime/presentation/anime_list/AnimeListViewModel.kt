@@ -26,9 +26,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AnimeListViewModel(
-    private val bookRepository: AnimeRepository
+    private val repository: AnimeRepository
 ) : ViewModel() {
-
     private var cachedAnime = emptyList<Anime>()
     private var searchJob: Job? = null
     private var observeFavoriteJob: Job? = null
@@ -64,12 +63,17 @@ class AnimeListViewModel(
                     it.copy(selectedTabIndex = action.index)
                 }
             }
+
+            AnimeListAction.LoadMore -> loadMoreAnime()
+            AnimeListAction.ClearNewSearchFlag -> {
+                _state.update { it.copy(isNewSearch = false) }
+            }
         }
     }
 
     private fun observeFavoriteAnime() {
         observeFavoriteJob?.cancel()
-        observeFavoriteJob = bookRepository
+        observeFavoriteJob = repository
             .getFavoriteAnime()
             .onEach { favoriteAnime ->
                 _state.update { it.copy(
@@ -85,51 +89,62 @@ class AnimeListViewModel(
             .distinctUntilChanged()
             .debounce(500L)
             .onEach { query ->
-                when {
-                    query.isBlank() -> {
-                        _state.update {
-                            it.copy(
-                                errorMessage = null,
-                                searchResults = cachedAnime
-                            )
-                        }
+                if (query.isBlank()) {
+                    _state.update {
+                        it.copy(
+                            errorMessage = null,
+                            searchResults = cachedAnime
+                        )
                     }
-
-                    query.length >= 2 -> {
-                        searchJob?.cancel()
-                        searchJob = searchAnime(query)
-                    }
+                } else if (query.length >= 2) {
+                    searchJob?.cancel()
+                    searchJob = searchAnime(query, page = 1)
                 }
             }
             .launchIn(viewModelScope)
     }
 
-    private fun searchAnime(query: String) = viewModelScope.launch {
-        _state.update {
-            it.copy(
-                isLoading = true
-            )
+    private fun searchAnime(query: String, page: Int, append: Boolean = false) = viewModelScope.launch {
+        if (!append) {
+            _state.update { it.copy(isLoading = true) }
         }
-        bookRepository
-            .searchAnime(query)
-            .onSuccess { searchResults ->
+
+        repository.searchAnime(query, page)
+            .onSuccess { result ->
+                cachedAnime = if (append) cachedAnime + result.anime else result.anime
                 _state.update {
                     it.copy(
                         isLoading = false,
+                        isLoadingMore = false,
                         errorMessage = null,
-                        searchResults = searchResults
+                        searchResults = if (append) it.searchResults + result.anime else result.anime,
+                        hasNextPage = result.hasNextPage,
+                        currentPage = page,
+                        canLoadMore = result.hasNextPage,
+                        isNewSearch = !append
                     )
                 }
             }
             .onError { error ->
                 _state.update {
                     it.copy(
-                        searchResults = emptyList(),
                         isLoading = false,
+                        isLoadingMore = false,
                         errorMessage = error.toUiText()
                     )
                 }
             }
     }
+
+    private fun loadMoreAnime() {
+        val currentState = state.value
+        if (currentState.isLoadingMore || !currentState.canLoadMore || currentState.searchQuery.isBlank()) return
+
+        _state.update { it.copy(isLoadingMore = true) }
+
+        val nextPage = currentState.currentPage + 1
+        searchAnime(currentState.searchQuery, page = nextPage, append = true)
+    }
+
 
 }
