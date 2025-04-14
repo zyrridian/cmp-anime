@@ -4,8 +4,10 @@ import androidx.sqlite.SQLiteException
 import com.zkylab.anime.anime.data.database.FavoriteAnimeDao
 import com.zkylab.anime.anime.data.mappers.toAnime
 import com.zkylab.anime.anime.data.mappers.toAnimeEntity
+import com.zkylab.anime.anime.data.mappers.toDomain
 import com.zkylab.anime.anime.data.network.RemoteAnimeDataSource
 import com.zkylab.anime.anime.domain.Anime
+import com.zkylab.anime.anime.domain.AnimeRecommendation
 import com.zkylab.anime.anime.domain.AnimeRepository
 import com.zkylab.anime.anime.domain.PaginatedAnimeResult
 import com.zkylab.anime.core.domain.DataError
@@ -43,6 +45,16 @@ class DefaultAnimeRepository(
         } else {
             Result.Success(localResult.synopsis)
         }
+    }
+
+    override suspend fun getAnimeRecommendations(animeId: String): Result<List<AnimeRecommendation>, DataError.Remote> {
+        return remoteAnimeDataSource
+            .getAnimeRecommendations(animeId)
+            .map { response ->
+                response.data
+                    ?.mapNotNull { it.toDomain() }
+                    ?: emptyList()
+            }
     }
 
     override fun getFavoriteAnime(): Flow<List<Anime>> {

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.zkylab.anime.app.Route
 import com.zkylab.anime.anime.domain.AnimeRepository
+import com.zkylab.anime.core.domain.onError
 import com.zkylab.anime.core.domain.onSuccess
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,7 +21,7 @@ import kotlinx.coroutines.launch
 class AnimeDetailViewModel(
     private val animeRepository: AnimeRepository,
     private val savedStateHandle: SavedStateHandle
-): ViewModel() {
+) : ViewModel() {
 
     private val animeId = savedStateHandle.toRoute<Route.AnimeDetail>().id
 
@@ -28,6 +29,7 @@ class AnimeDetailViewModel(
     val state = _state
         .onStart {
 //            fetchAnimeDescription()
+            fetchAnimeRecommendations()
             observeFavoriteStatus()
         }
         .stateIn(
@@ -37,15 +39,18 @@ class AnimeDetailViewModel(
         )
 
     fun onAction(action: AnimeDetailAction) {
-        when(action) {
+        when (action) {
             is AnimeDetailAction.OnSelectedAnimeChange -> {
-                _state.update { it.copy(
-                    anime = action.anime
-                ) }
+                _state.update {
+                    it.copy(
+                        anime = action.anime
+                    )
+                }
             }
+
             is AnimeDetailAction.OnFavoriteClick -> {
                 viewModelScope.launch {
-                    if(state.value.isFavorite) {
+                    if (state.value.isFavorite) {
                         animeRepository.deleteFromFavorites(animeId)
                     } else {
                         state.value.anime?.let { anime ->
@@ -54,6 +59,7 @@ class AnimeDetailViewModel(
                     }
                 }
             }
+
             else -> Unit
         }
     }
@@ -62,9 +68,11 @@ class AnimeDetailViewModel(
         animeRepository
             .isAnimeFavorite(animeId)
             .onEach { isFavorite ->
-                _state.update { it.copy(
-                    isFavorite = isFavorite
-                ) }
+                _state.update {
+                    it.copy(
+                        isFavorite = isFavorite
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -83,4 +91,26 @@ class AnimeDetailViewModel(
 //                }
 //        }
 //    }
+
+
+    private fun fetchAnimeRecommendations() {
+        viewModelScope.launch {
+            animeRepository
+                .getAnimeRecommendations(animeId)
+                .onSuccess { recommendations ->
+                    _state.update {
+                        it.copy(
+                            recommendations = recommendations,
+                            isLoading = false
+                        )
+                    }
+                }
+                .onError {
+                    _state.update {
+                        it.copy(isLoading = false)
+                    }
+                    // Optionally handle error
+                }
+        }
+    }
 }

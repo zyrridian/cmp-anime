@@ -1,5 +1,6 @@
 package com.zkylab.anime.anime.data.network
 
+import com.zkylab.anime.anime.data.dto.AnimeRecommendationResponseDto
 import com.zkylab.anime.core.data.safeCall
 import com.zkylab.anime.core.domain.DataError
 import com.zkylab.anime.core.domain.Result
@@ -13,7 +14,7 @@ private const val BASE_URL = "https://api.jikan.moe/v4"
 
 class KtorRemoteAnimeDataSource(
     private val httpClient: HttpClient
-): RemoteAnimeDataSource {
+) : RemoteAnimeDataSource {
 
     override suspend fun searchAnime(
         query: String,
@@ -34,6 +35,14 @@ class KtorRemoteAnimeDataSource(
         return safeCall<SearchedAnimeDto> {
             httpClient.get(
                 urlString = "$BASE_URL/anime/$animeId"
+            )
+        }
+    }
+
+    override suspend fun getAnimeRecommendations(animeId: String): Result<AnimeRecommendationResponseDto, DataError.Remote> {
+        return safeCall<AnimeRecommendationResponseDto> {
+            httpClient.get(
+                urlString = "$BASE_URL/anime/$animeId/recommendations"
             )
         }
     }

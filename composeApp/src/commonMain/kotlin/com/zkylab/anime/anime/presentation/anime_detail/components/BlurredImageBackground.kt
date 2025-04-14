@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
@@ -65,11 +68,12 @@ fun BlurredImageBackground(
     var imageLoadResult by remember {
         mutableStateOf<Result<Painter>?>(null)
     }
+
     val painter = rememberAsyncImagePainter(
         model = imageUrl,
         onSuccess = {
             val size = it.painter.intrinsicSize
-            imageLoadResult = if(size.width > 1 && size.height > 1) {
+            imageLoadResult = if (size.width > 1 && size.height > 1) {
                 Result.success(it.painter)
             } else {
                 Result.failure(Exception("Invalid image dimensions"))
@@ -80,35 +84,111 @@ fun BlurredImageBackground(
         }
     )
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+
+        // 🔹 Static blurred image background with hardcoded height
+        Image(
+            painter = painter,
+            contentDescription = stringResource(Res.string.anime_cover),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .blur(20.dp)
+                .background(DarkBlue)
+        )
+
+        // 🔹 Scrollable foreground content
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(0.3f)
-                    .fillMaxWidth()
-                    .background(DarkBlue)
-            ) {
-                Image(
-                    painter = painter,
-                    contentDescription = stringResource(Res.string.anime_cover),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .blur(20.dp)
-                )
-            }
+            // Spacer to push content below the background image
+            Spacer(modifier = Modifier.height(200.dp)) // adjust to overlap partially
 
             Box(
                 modifier = Modifier
-                    .weight(0.7f)
                     .fillMaxWidth()
                     .background(DesertWhite)
-            )
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    ElevatedCard(
+                        modifier = Modifier
+                            .height(230.dp)
+                            .aspectRatio(2 / 3f)
+                            .offset(y = (-115).dp),
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = CardDefaults.elevatedCardElevation(
+                            defaultElevation = 15.dp
+                        )
+                    ) {
+                        AnimatedContent(targetState = imageLoadResult) { result ->
+                            when (result) {
+                                null -> Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    PulseAnimation(modifier = Modifier.size(60.dp))
+                                }
+
+                                else -> {
+                                    Box {
+                                        Image(
+                                            painter = if (result.isSuccess) painter else {
+                                                painterResource(Res.drawable.anime_error_2)
+                                            },
+                                            contentDescription = stringResource(Res.string.anime_cover),
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Transparent),
+                                            contentScale = if (result.isSuccess) {
+                                                ContentScale.Crop
+                                            } else {
+                                                ContentScale.Fit
+                                            }
+                                        )
+
+                                        IconButton(
+                                            onClick = onFavoriteClick,
+                                            modifier = Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .background(
+                                                    brush = Brush.radialGradient(
+                                                        colors = listOf(
+                                                            SandYellow, Color.Transparent
+                                                        ),
+                                                        radius = 70f
+                                                    )
+                                                )
+                                        ) {
+                                            Icon(
+                                                imageVector = if (isFavorite) {
+                                                    Icons.Filled.Favorite
+                                                } else {
+                                                    Icons.Outlined.FavoriteBorder
+                                                },
+                                                tint = Color.Red,
+                                                contentDescription = if (isFavorite) {
+                                                    stringResource(Res.string.remove_from_favorites)
+                                                } else {
+                                                    stringResource(Res.string.mark_as_favorite)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Call user-defined content below card
+                    content()
+                }
+            }
         }
 
+        // 🔹 Back button on top
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
@@ -121,84 +201,6 @@ fun BlurredImageBackground(
                 contentDescription = stringResource(Res.string.go_back),
                 tint = Color.White
             )
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.15f))
-            ElevatedCard(
-                modifier = Modifier
-                    .height(230.dp)
-                    .aspectRatio(2 / 3f),
-                shape = RoundedCornerShape(8.dp),
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 15.dp
-                )
-            ) {
-                AnimatedContent(
-                    targetState = imageLoadResult
-                ) { result ->
-                    when(result) {
-                        null -> Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            PulseAnimation(
-                                modifier = Modifier
-                                    .size(60.dp)
-                            )
-                        }
-                        else -> {
-                            Box {
-                                Image(
-                                    painter = if(result.isSuccess) painter else {
-                                        painterResource(Res.drawable.anime_error_2)
-                                    },
-                                    contentDescription = stringResource(Res.string.anime_cover),
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Transparent),
-                                    contentScale = if(result.isSuccess) {
-                                        ContentScale.Crop
-                                    } else {
-                                        ContentScale.Fit
-                                    }
-                                )
-                                IconButton(
-                                    onClick = onFavoriteClick,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .background(
-                                            brush = Brush.radialGradient(
-                                                colors = listOf(
-                                                    SandYellow, Color.Transparent
-                                                ),
-                                                radius = 70f
-                                            )
-                                        )
-                                ) {
-                                    Icon(
-                                        imageVector = if(isFavorite) {
-                                            Icons.Filled.Favorite
-                                        } else {
-                                            Icons.Outlined.FavoriteBorder
-                                        },
-                                        tint = Color.Red,
-                                        contentDescription = if(isFavorite) {
-                                            stringResource(Res.string.remove_from_favorites)
-                                        } else {
-                                            stringResource(Res.string.mark_as_favorite)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            content()
         }
     }
 }

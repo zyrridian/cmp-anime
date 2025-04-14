@@ -5,15 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +39,7 @@ import cmp_anime.composeapp.generated.resources.synopsis
 import com.zkylab.anime.anime.presentation.anime_detail.components.BlurredImageBackground
 import com.zkylab.anime.anime.presentation.anime_detail.components.AnimeChip
 import com.zkylab.anime.anime.presentation.anime_detail.components.ChipSize
+import com.zkylab.anime.anime.presentation.anime_detail.components.RecommendationCard
 import com.zkylab.anime.anime.presentation.anime_detail.components.TitledContent
 import com.zkylab.anime.core.presentation.SandYellow
 import org.jetbrains.compose.resources.stringResource
@@ -52,7 +55,7 @@ fun AnimeDetailScreenRoot(
     AnimeDetailScreen(
         state = state,
         onAction = { action ->
-            when(action) {
+            when (action) {
                 is AnimeDetailAction.OnBackClick -> onBackClick()
                 else -> Unit
             }
@@ -78,36 +81,34 @@ private fun AnimeDetailScreen(
         },
         modifier = Modifier.fillMaxSize()
     ) {
-        if(state.anime != null) {
+        if (state.anime != null) {
             Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .widthIn(max = 700.dp)
                     .fillMaxWidth()
-                    .padding(
-                        vertical = 16.dp,
-                        horizontal = 24.dp
-                    )
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .offset(y = (-115).dp)
+                    .padding(vertical = 16.dp)
             ) {
                 state.anime.title?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
                 state.anime.studios?.joinToString()?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
                 Row(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
                 ) {
                     state.anime.score?.let { rating ->
                         TitledContent(
@@ -135,11 +136,10 @@ private fun AnimeDetailScreen(
                         }
                     }
                 }
-                if(state.anime.genres?.isNotEmpty() == true) {
+                if (state.anime.genres?.isNotEmpty() == true) {
                     TitledContent(
                         title = stringResource(Res.string.genre),
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
                     ) {
                         FlowRow(
                             horizontalArrangement = Arrangement.Center,
@@ -165,36 +165,67 @@ private fun AnimeDetailScreen(
                     modifier = Modifier
                         .align(Alignment.Start)
                         .fillMaxWidth()
-                        .padding(
-                            top = 24.dp,
-                            bottom = 8.dp
-                        )
+                        .padding(top = 24.dp, bottom = 8.dp, start = 24.dp, end = 24.dp)
                 )
-//                if(state.isLoading) {
-//                    CircularProgressIndicator()
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .weight(1f),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                    }
-//                } else {
-                    Text(
-                        text = if(state.anime.synopsis.isNullOrBlank()) {
-                            stringResource(Res.string.description_unavailable)
-                        } else {
-                            state.anime.synopsis
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,
-                        color = if(state.anime.synopsis.isNullOrBlank()) {
-                            Color.Black.copy(alpha = 0.4f)
-                        } else Color.Black,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
+                //                if(state.isLoading) {
+                //                    CircularProgressIndicator()
+                //                    Box(
+                //                        modifier = Modifier
+                //                            .fillMaxWidth()
+                //                            .weight(1f),
+                //                        contentAlignment = Alignment.Center
+                //                    ) {
+                //                    }
+                //                } else {
+                Text(
+                    text = if (state.anime.synopsis.isNullOrBlank()) {
+                        stringResource(Res.string.description_unavailable)
+                    } else {
+                        state.anime.synopsis
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Justify,
+                    color = if (state.anime.synopsis.isNullOrBlank()) {
+                        Color.Black.copy(alpha = 0.4f)
+                    } else Color.Black,
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
+                )
+                //                }
+
+
+                Text(
+                    text = "Recommendations",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .fillMaxWidth()
+                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
+                )
+
+                if (state.isLoading) {
+                    CircularProgressIndicator()
+                } else {
+                    state.recommendations?.let { recommendations ->
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(recommendations) { recommendation ->
+                                    RecommendationCard(
+                                        title = recommendation.title,
+                                        imageUrl = recommendation.imageUrl ?: "",
+                                        modifier = Modifier
+                                    )
+                                }
+                            }
+                        }
+                    } ?: Text( // fallback if null
+                        text = "No recommendations available.",
+                        modifier = Modifier.padding(16.dp)
                     )
-//                }
+                }
             }
         }
     }
