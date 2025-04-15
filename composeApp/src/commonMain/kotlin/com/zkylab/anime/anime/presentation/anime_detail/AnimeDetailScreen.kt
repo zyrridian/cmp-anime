@@ -38,6 +38,7 @@ import cmp_anime.composeapp.generated.resources.rating
 import cmp_anime.composeapp.generated.resources.synopsis
 import com.zkylab.anime.anime.presentation.anime_detail.components.BlurredImageBackground
 import com.zkylab.anime.anime.presentation.anime_detail.components.AnimeChip
+import com.zkylab.anime.anime.presentation.anime_detail.components.CharacterCard
 import com.zkylab.anime.anime.presentation.anime_detail.components.ChipSize
 import com.zkylab.anime.anime.presentation.anime_detail.components.RecommendationCard
 import com.zkylab.anime.anime.presentation.anime_detail.components.TitledContent
@@ -192,6 +193,36 @@ private fun AnimeDetailScreen(
                 )
                 //                }
 
+                Text(
+                    text = "Characters",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .fillMaxWidth()
+                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
+                )
+
+                state.characters?.let { characters ->
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(characters) { character ->
+                            val voiceActor = character.voiceActors.firstOrNull()
+                            CharacterCard(
+                                characterName = character.name,
+                                characterImageUrl = character.imageUrl,
+                                role = character.role,
+                                voiceActorName = voiceActor?.name,
+                                voiceActorImageUrl = voiceActor?.imageUrl
+                            )
+                        }
+                    }
+                } ?: Text( // fallback if null
+                    text = "No characters available.",
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
 
                 Text(
                     text = "Recommendations",

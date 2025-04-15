@@ -7,6 +7,7 @@ import com.zkylab.anime.anime.data.mappers.toAnimeEntity
 import com.zkylab.anime.anime.data.mappers.toDomain
 import com.zkylab.anime.anime.data.network.RemoteAnimeDataSource
 import com.zkylab.anime.anime.domain.Anime
+import com.zkylab.anime.anime.domain.AnimeCharacter
 import com.zkylab.anime.anime.domain.AnimeRecommendation
 import com.zkylab.anime.anime.domain.AnimeRepository
 import com.zkylab.anime.anime.domain.PaginatedAnimeResult
@@ -50,6 +51,16 @@ class DefaultAnimeRepository(
     override suspend fun getAnimeRecommendations(animeId: String): Result<List<AnimeRecommendation>, DataError.Remote> {
         return remoteAnimeDataSource
             .getAnimeRecommendations(animeId)
+            .map { response ->
+                response.data
+                    ?.mapNotNull { it.toDomain() }
+                    ?: emptyList()
+            }
+    }
+
+    override suspend fun getAnimeCharacters(animeId: String): Result<List<AnimeCharacter>, DataError.Remote> {
+        return remoteAnimeDataSource
+            .getAnimeCharacters(animeId)
             .map { response ->
                 response.data
                     ?.mapNotNull { it.toDomain() }

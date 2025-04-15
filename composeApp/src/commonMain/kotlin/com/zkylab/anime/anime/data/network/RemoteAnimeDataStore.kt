@@ -1,5 +1,6 @@
 package com.zkylab.anime.anime.data.network
 
+import com.zkylab.anime.anime.data.dto.AnimeCharacterResponseDto
 import com.zkylab.anime.anime.data.dto.AnimeRecommendationResponseDto
 import com.zkylab.anime.anime.data.dto.SearchResponseDto
 import com.zkylab.anime.anime.data.dto.SearchedAnimeDto
@@ -16,4 +17,6 @@ interface RemoteAnimeDataSource {
     suspend fun getAnimeDetails(animeId: String): Result<SearchedAnimeDto, DataError.Remote>
 
     suspend fun getAnimeRecommendations(animeId: String): Result<AnimeRecommendationResponseDto, DataError.Remote>
+
+    suspend fun getAnimeCharacters(animeId: String): Result<AnimeCharacterResponseDto, DataError.Remote>
 }

@@ -1,10 +1,11 @@
 package com.zkylab.anime.anime.data.mappers
 
 import com.zkylab.anime.anime.data.database.AnimeEntity
-import com.zkylab.anime.anime.data.database.AnimeRecommendationEntity
 import com.zkylab.anime.anime.data.dto.*
 import com.zkylab.anime.anime.domain.Anime
+import com.zkylab.anime.anime.domain.AnimeCharacter
 import com.zkylab.anime.anime.domain.AnimeRecommendation
+import com.zkylab.anime.anime.domain.AnimeVoiceActor
 
 // ----------------------------
 // Main Anime Mapping
@@ -71,26 +72,6 @@ fun AnimeEntity.toAnime(): Anime {
 // Anime Recommendation Mapping
 // ----------------------------
 
-fun AnimeRecommendationDto.toEntity(): AnimeRecommendationEntity {
-    return AnimeRecommendationEntity(
-        malId = entry?.malId,
-        title = entry?.title,
-        imageUrl = entry?.images?.jpg?.imageUrl,
-        url = entry?.url,
-        votes = votes
-    )
-}
-
-fun AnimeRecommendationEntity.toDomain(): AnimeRecommendation {
-    return AnimeRecommendation(
-        malId = malId ?: -1,
-        title = title.orEmpty(),
-        imageUrl = imageUrl.orEmpty(),
-        url = url.orEmpty(),
-        votes = votes ?: 0
-    )
-}
-
 fun AnimeRecommendationDto.toDomain(): AnimeRecommendation? {
     val entry = this.entry ?: return null
     return AnimeRecommendation(
@@ -102,6 +83,32 @@ fun AnimeRecommendationDto.toDomain(): AnimeRecommendation? {
     )
 }
 
-fun List<AnimeRecommendationDto>?.toDomainList(): List<AnimeRecommendation> {
-    return this?.mapNotNull { it.toDomain() } ?: emptyList()
+// ----------------------------
+// Anime Character Mapping
+// ----------------------------
+
+fun AnimeCharacterDto.toDomain(): AnimeCharacter? {
+    val character = this.character ?: return null
+
+    return AnimeCharacter(
+        malId = character.malId ?: return null,
+        name = character.name.orEmpty(),
+        imageUrl = character.images?.jpg?.imageUrl.orEmpty(),
+        url = character.url.orEmpty(),
+        role = this.role.orEmpty(),
+        favorites = this.favorites ?: 0,
+        voiceActors = this.voiceActors?.mapNotNull { it.toDomain() } ?: emptyList()
+    )
+}
+
+fun AnimeVoiceActorDto.toDomain(): AnimeVoiceActor? {
+    val person = this.person ?: return null
+
+    return AnimeVoiceActor(
+        malId = person.malId ?: return null,
+        name = person.name.orEmpty(),
+        imageUrl = person.images?.jpg?.imageUrl.orEmpty(),
+        url = person.url.orEmpty(),
+        language = this.language.orEmpty()
+    )
 }
