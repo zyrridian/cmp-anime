@@ -41,6 +41,7 @@ import com.zkylab.anime.anime.presentation.anime_detail.components.AnimeChip
 import com.zkylab.anime.anime.presentation.anime_detail.components.CharacterCard
 import com.zkylab.anime.anime.presentation.anime_detail.components.ChipSize
 import com.zkylab.anime.anime.presentation.anime_detail.components.RecommendationCard
+import com.zkylab.anime.anime.presentation.anime_detail.components.StaffCard
 import com.zkylab.anime.anime.presentation.anime_detail.components.TitledContent
 import com.zkylab.anime.core.presentation.SandYellow
 import org.jetbrains.compose.resources.stringResource
@@ -193,6 +194,7 @@ private fun AnimeDetailScreen(
                 )
                 //                }
 
+
                 Text(
                     text = "Characters",
                     style = MaterialTheme.typography.titleLarge,
@@ -223,6 +225,36 @@ private fun AnimeDetailScreen(
                     text = "No characters available.",
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
+
+                Text(
+                    text = "Staff",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .fillMaxWidth()
+                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
+                )
+
+                state.staff?.let { staffList ->
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(staffList) { staff ->
+                            StaffCard(
+                                staffName = staff.name,
+                                staffImageUrl = staff.imageUrl,
+                                positions = staff.positions,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                } ?: Text( // fallback if null
+                    text = "No staff available.",
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
 
                 Text(
                     text = "Recommendations",

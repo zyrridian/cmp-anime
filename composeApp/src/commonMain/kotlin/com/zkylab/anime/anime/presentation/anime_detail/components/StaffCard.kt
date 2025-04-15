@@ -4,9 +4,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,12 +22,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 
 @Composable
-fun CharacterCard(
-    characterName: String,
-    characterImageUrl: String,
-    role: String,
-    voiceActorName: String?,
-    voiceActorImageUrl: String?,
+fun StaffCard(
+    staffName: String,
+    staffImageUrl: String,
+    positions: List<String>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -45,8 +43,8 @@ fun CharacterCard(
                 )
         ) {
             androidx.compose.foundation.Image(
-                painter = rememberAsyncImagePainter(characterImageUrl),
-                contentDescription = characterName,
+                painter = rememberAsyncImagePainter(staffImageUrl),
+                contentDescription = staffName,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
@@ -55,28 +53,22 @@ fun CharacterCard(
         }
 
         Text(
-            text = characterName,
+            text = staffName,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 6.dp).fillMaxWidth()
+            modifier = Modifier.padding(top = 6.dp)
         )
 
-        Text(
-            text = role,
-            style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
-            textAlign = TextAlign.Center
-        )
-
-        voiceActorName?.let {
+        positions.joinToString(", ").let { positionsText ->
             Text(
-                text = "VA: $it",
-                style = MaterialTheme.typography.bodySmall,
+                text = "Roles: $positionsText",
+                style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .width(160.dp)
             )
         }
     }

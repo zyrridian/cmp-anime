@@ -30,6 +30,7 @@ class AnimeDetailViewModel(
         .onStart {
             fetchAnimeRecommendations()
             fetchAnimeCharacters()
+            fetchAnimeStaff()
             observeFavoriteStatus()
         }
         .stateIn(
@@ -118,4 +119,26 @@ class AnimeDetailViewModel(
                 }
         }
     }
+
+    private fun fetchAnimeStaff() {
+        viewModelScope.launch {
+            animeRepository
+                .getAnimeStaff(animeId)
+                .onSuccess { staff ->
+                    _state.update {
+                        it.copy(
+                            staff = staff,
+                            isLoading = false
+                        )
+                    }
+                }
+                .onError {
+                    _state.update {
+                        it.copy(isLoading = false)
+                    }
+                    // Optionally handle error
+                }
+        }
+    }
+
 }

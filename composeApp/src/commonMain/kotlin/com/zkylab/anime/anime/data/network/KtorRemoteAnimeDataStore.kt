@@ -2,6 +2,7 @@ package com.zkylab.anime.anime.data.network
 
 import com.zkylab.anime.anime.data.dto.AnimeCharacterResponseDto
 import com.zkylab.anime.anime.data.dto.AnimeRecommendationResponseDto
+import com.zkylab.anime.anime.data.dto.AnimeStaffResponseDto
 import com.zkylab.anime.core.data.safeCall
 import com.zkylab.anime.core.domain.DataError
 import com.zkylab.anime.core.domain.Result
@@ -52,6 +53,14 @@ class KtorRemoteAnimeDataSource(
         return safeCall<AnimeCharacterResponseDto> {
             httpClient.get(
                 urlString = "$BASE_URL/anime/$animeId/characters"
+            )
+        }
+    }
+
+    override suspend fun getAnimeStaff(animeId: String): Result<AnimeStaffResponseDto, DataError.Remote> {
+        return safeCall<AnimeStaffResponseDto> {
+            httpClient.get(
+                urlString = "$BASE_URL/anime/$animeId/staff"
             )
         }
     }

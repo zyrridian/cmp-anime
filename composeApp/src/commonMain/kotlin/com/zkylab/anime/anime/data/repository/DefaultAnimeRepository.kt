@@ -10,6 +10,7 @@ import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.domain.AnimeCharacter
 import com.zkylab.anime.anime.domain.AnimeRecommendation
 import com.zkylab.anime.anime.domain.AnimeRepository
+import com.zkylab.anime.anime.domain.AnimeStaff
 import com.zkylab.anime.anime.domain.PaginatedAnimeResult
 import com.zkylab.anime.core.domain.DataError
 import com.zkylab.anime.core.domain.EmptyResult
@@ -61,6 +62,16 @@ class DefaultAnimeRepository(
     override suspend fun getAnimeCharacters(animeId: String): Result<List<AnimeCharacter>, DataError.Remote> {
         return remoteAnimeDataSource
             .getAnimeCharacters(animeId)
+            .map { response ->
+                response.data
+                    ?.mapNotNull { it.toDomain() }
+                    ?: emptyList()
+            }
+    }
+
+    override suspend fun getAnimeStaff(animeId: String): Result<List<AnimeStaff>, DataError.Remote> {
+        return remoteAnimeDataSource
+            .getAnimeStaff(animeId)
             .map { response ->
                 response.data
                     ?.mapNotNull { it.toDomain() }

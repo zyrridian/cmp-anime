@@ -4,7 +4,9 @@ import com.zkylab.anime.anime.data.database.AnimeEntity
 import com.zkylab.anime.anime.data.dto.*
 import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.domain.AnimeCharacter
+import com.zkylab.anime.anime.domain.AnimePersonImages
 import com.zkylab.anime.anime.domain.AnimeRecommendation
+import com.zkylab.anime.anime.domain.AnimeStaff
 import com.zkylab.anime.anime.domain.AnimeVoiceActor
 
 // ----------------------------
@@ -110,5 +112,35 @@ fun AnimeVoiceActorDto.toDomain(): AnimeVoiceActor? {
         imageUrl = person.images?.jpg?.imageUrl.orEmpty(),
         url = person.url.orEmpty(),
         language = this.language.orEmpty()
+    )
+}
+
+
+// ----------------------------
+// Anime Staff Mapping
+// ----------------------------
+
+// Maps AnimeStaffResponseDto to a list of AnimeStaff
+fun AnimeStaffResponseDto.toDomain(): List<AnimeStaff> {
+    return data?.mapNotNull { it.toDomain() } ?: emptyList()
+}
+
+// Maps AnimeStaffDto to AnimeStaff
+fun AnimeStaffDto.toDomain(): AnimeStaff? {
+    val person = person ?: return null
+
+    return AnimeStaff(
+        malId = person.malId ?: return null,
+        name = person.name.orEmpty(),
+        imageUrl = person.images?.jpg?.imageUrl.orEmpty(),
+        url = person.url.orEmpty(),
+        positions = positions ?: emptyList()
+    )
+}
+
+// Maps AnimePersonDto to AnimeStaff (Part of the mapping above)
+fun AnimePersonDto.toPersonImages(): AnimePersonImages {
+    return AnimePersonImages(
+        imageUrl = images?.jpg?.imageUrl.orEmpty()
     )
 }
