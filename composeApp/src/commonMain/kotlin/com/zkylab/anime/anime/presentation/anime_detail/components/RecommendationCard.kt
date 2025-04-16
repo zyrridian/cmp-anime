@@ -1,11 +1,8 @@
 package com.zkylab.anime.anime.presentation.anime_detail.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 
@@ -35,11 +33,11 @@ fun RecommendationCard(
                 .clip(RoundedCornerShape(12.dp))
                 .border(
                     width = 1.dp,
-                    color = Color.LightGray.copy(alpha = 0.4f),
+                    color = Color.LightGray.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(12.dp)
                 )
         ) {
-            androidx.compose.foundation.Image(
+            Image(
                 painter = rememberAsyncImagePainter(imageUrl),
                 contentDescription = title,
                 contentScale = ContentScale.Crop,
@@ -53,8 +51,11 @@ fun RecommendationCard(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 6.dp)
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(top = 6.dp)
+                .width(160.dp)
         )
     }
 }
-

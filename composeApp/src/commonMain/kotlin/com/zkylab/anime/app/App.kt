@@ -1,17 +1,9 @@
 package com.zkylab.anime.app
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
@@ -20,16 +12,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import cmp_anime.composeapp.generated.resources.Res
-import cmp_anime.composeapp.generated.resources.compose_multiplatform
-import com.zkylab.anime.Greeting
 import com.zkylab.anime.anime.presentation.SelectedAnimeViewModel
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailAction
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailScreenRoot
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailViewModel
-import com.zkylab.anime.anime.presentation.anime_list.AnimeListScreen
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListScreenRoot
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListViewModel
 import org.koin.compose.viewmodel.koinViewModel

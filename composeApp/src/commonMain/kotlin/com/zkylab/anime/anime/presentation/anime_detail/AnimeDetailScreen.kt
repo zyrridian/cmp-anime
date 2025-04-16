@@ -1,5 +1,8 @@
 package com.zkylab.anime.anime.presentation.anime_detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,18 +10,23 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,143 +80,242 @@ private fun AnimeDetailScreen(
     state: AnimeDetailState,
     onAction: (AnimeDetailAction) -> Unit
 ) {
-    BlurredImageBackground(
-        imageUrl = state.anime?.imageUrl,
-        isFavorite = state.isFavorite,
-        onFavoriteClick = {
-            onAction(AnimeDetailAction.OnFavoriteClick)
-        },
-        onBackClick = {
-            onAction(AnimeDetailAction.OnBackClick)
-        },
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if (state.anime != null) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .widthIn(max = 700.dp)
-                    .fillMaxWidth()
-                    .offset(y = (-115).dp)
-                    .padding(vertical = 16.dp)
+    Box(modifier = Modifier.fillMaxSize()
+        .verticalScroll(rememberScrollState())) {
+        if (state.isLoading && state.anime == null) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            BlurredImageBackground(
+                imageUrl = state.anime?.imageUrl,
+                isFavorite = state.isFavorite,
+                onFavoriteClick = {
+                    onAction(AnimeDetailAction.OnFavoriteClick)
+                },
+                onBackClick = {
+                    onAction(AnimeDetailAction.OnBackClick)
+                },
+                modifier = Modifier.fillMaxSize()
             ) {
-                state.anime.title?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                state.anime?.let { anime ->
+                    AnimeDetailContent(
+                        state = state,
+                        onAction = onAction
                     )
                 }
-                state.anime.studios?.joinToString()?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
-                ) {
-                    state.anime.score?.let { rating ->
-                        TitledContent(
-                            title = stringResource(Res.string.rating),
-                        ) {
-                            AnimeChip {
-                                Text(
-                                    text = "${round(rating * 10) / 10.0}"
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = SandYellow
-                                )
-                            }
-                        }
-                    }
-                    state.anime.duration?.let { pageCount ->
-                        TitledContent(
-                            title = stringResource(Res.string.duration),
-                        ) {
-                            AnimeChip {
-                                Text(text = pageCount.toString())
-                            }
-                        }
-                    }
-                }
-                if (state.anime.genres?.isNotEmpty() == true) {
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AnimeDetailContent(
+    state: AnimeDetailState,
+    onAction: (AnimeDetailAction) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .widthIn(max = 700.dp)
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+
+        Spacer(modifier = Modifier.height(124.dp))
+
+        // Title and Studio Section
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        ) {
+            state.anime?.title?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            state.anime?.studios?.joinToString()?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Info Section (Rating and Duration)
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            ),
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 8.dp)
+            ) {
+                state.anime?.score?.let { rating ->
                     TitledContent(
-                        title = stringResource(Res.string.genre),
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
+                        title = stringResource(Res.string.rating),
                     ) {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.wrapContentSize(Alignment.Center)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            state.anime.genres.forEach { language ->
-                                AnimeChip(
-                                    size = ChipSize.SMALL,
-                                    modifier = Modifier.padding(2.dp)
-                                ) {
-                                    Text(
-                                        text = language.uppercase(),
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
+                            Text(
+                                text = "${round(rating * 10) / 10.0}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = SandYellow,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                state.anime?.duration?.let { duration ->
+                    TitledContent(
+                        title = stringResource(Res.string.duration),
+                    ) {
+                        Text(
+                            text = "$duration min",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Genres Section
+        if (state.anime?.genres?.isNotEmpty() == true) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                ),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
+            ) {
+                TitledContent(
+                    title = stringResource(Res.string.genre),
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)
+                ) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        state.anime.genres.forEach { genre ->
+                            AnimeChip(
+                                size = ChipSize.SMALL,
+                                modifier = Modifier.padding(2.dp)
+                            ) {
+                                Text(
+                                    text = genre,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
                 }
+            }
+        }
+
+        // Synopsis Section
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+            ),
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .fillMaxWidth()
+        ) {
+            Column(modifier = Modifier) {
                 Text(
                     text = stringResource(Res.string.synopsis),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, bottom = 8.dp, start = 24.dp, end = 24.dp)
-                )
-                //                if(state.isLoading) {
-                //                    CircularProgressIndicator()
-                //                    Box(
-                //                        modifier = Modifier
-                //                            .fillMaxWidth()
-                //                            .weight(1f),
-                //                        contentAlignment = Alignment.Center
-                //                    ) {
-                //                    }
-                //                } else {
-                Text(
-                    text = if (state.anime.synopsis.isNullOrBlank()) {
-                        stringResource(Res.string.description_unavailable)
-                    } else {
-                        state.anime.synopsis
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Justify,
-                    color = if (state.anime.synopsis.isNullOrBlank()) {
-                        Color.Black.copy(alpha = 0.4f)
-                    } else Color.Black,
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
-                )
-                //                }
-
-
-                Text(
-                    text = "Characters",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .fillMaxWidth()
-                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
 
-                state.characters?.let { characters ->
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (state.isLoading) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                } else {
+                    Text(
+                        text = if (state.anime?.synopsis.isNullOrBlank()) {
+                            stringResource(Res.string.description_unavailable)
+                        } else {
+                            state.anime?.synopsis.orEmpty()
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Justify,
+                        color = if (state.anime?.synopsis.isNullOrBlank()) {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        } else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+        }
+
+        // Characters Section
+        SectionTitle(
+            title = "Characters",
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(horizontal = 24.dp)
+        )
+
+        AnimatedVisibility(
+            visible = !state.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            state.characters?.let { characters ->
+                if (characters.isNotEmpty()) {
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     ) {
                         items(characters) { character ->
                             val voiceActor = character.voiceActors.firstOrNull()
@@ -221,75 +328,156 @@ private fun AnimeDetailScreen(
                             )
                         }
                     }
-                } ?: Text( // fallback if null
-                    text = "No characters available.",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                } else {
+                    EmptySection(text = "No characters available")
+                }
+            } ?: EmptySection(text = "No characters available")
+        }
 
-                Text(
-                    text = "Staff",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .fillMaxWidth()
-                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
-                )
+        if (state.isLoading) {
+            LoadingSection()
+        }
 
-                state.staff?.let { staffList ->
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+        )
+
+        // Staff Section
+        SectionTitle(
+            title = "Staff",
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(horizontal = 24.dp)
+        )
+
+        AnimatedVisibility(
+            visible = !state.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            state.staff?.let { staffList ->
+                if (staffList.isNotEmpty()) {
                     LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     ) {
                         items(staffList) { staff ->
                             StaffCard(
                                 staffName = staff.name,
                                 staffImageUrl = staff.imageUrl,
                                 positions = staff.positions,
-                                modifier = Modifier.padding(8.dp)
+                                modifier = Modifier.padding(0.dp)
                             )
                         }
                     }
-                } ?: Text( // fallback if null
-                    text = "No staff available.",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
-
-                Text(
-                    text = "Recommendations",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .fillMaxWidth()
-                        .padding(top = 32.dp, bottom = 8.dp, start = 24.dp)
-                )
-
-                if (state.isLoading) {
-                    CircularProgressIndicator()
                 } else {
-                    state.recommendations?.let { recommendations ->
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(recommendations) { recommendation ->
-                                    RecommendationCard(
-                                        title = recommendation.title,
-                                        imageUrl = recommendation.imageUrl ?: "",
-                                        modifier = Modifier
-                                    )
-                                }
-                            }
-                        }
-                    } ?: Text( // fallback if null
-                        text = "No recommendations available.",
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    EmptySection(text = "No staff available")
                 }
-            }
+            } ?: EmptySection(text = "No staff available")
         }
+
+        if (state.isLoading) {
+            LoadingSection()
+        }
+
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+        )
+
+        // Recommendations Section
+        SectionTitle(
+            title = "Recommendations",
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(horizontal = 24.dp)
+        )
+
+        AnimatedVisibility(
+            visible = !state.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            state.recommendations?.let { recommendations ->
+                if (recommendations.isNotEmpty()) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        items(recommendations) { recommendation ->
+                            RecommendationCard(
+                                title = recommendation.title,
+                                imageUrl = recommendation.imageUrl ?: "",
+                                modifier = Modifier
+                            )
+                        }
+                    }
+                } else {
+                    EmptySection(text = "No recommendations available")
+                }
+            } ?: EmptySection(text = "No recommendations available")
+        }
+
+        if (state.isLoading) {
+            LoadingSection()
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier.padding(top = 24.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun EmptySection(text: String) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        ),
+        modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        )
+    }
+}
+
+@Composable
+private fun LoadingSection() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(32.dp)
+        )
     }
 }

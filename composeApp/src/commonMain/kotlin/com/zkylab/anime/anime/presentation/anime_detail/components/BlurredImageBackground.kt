@@ -1,13 +1,16 @@
 package com.zkylab.anime.anime.presentation.anime_detail.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,20 +18,18 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -49,12 +52,10 @@ import cmp_anime.composeapp.generated.resources.go_back
 import cmp_anime.composeapp.generated.resources.mark_as_favorite
 import cmp_anime.composeapp.generated.resources.remove_from_favorites
 import coil3.compose.rememberAsyncImagePainter
-import com.zkylab.anime.core.presentation.DarkBlue
-import com.zkylab.anime.core.presentation.DesertWhite
 import com.zkylab.anime.core.presentation.PulseAnimation
-import com.zkylab.anime.core.presentation.SandYellow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
 
 @Composable
 fun BlurredImageBackground(
@@ -80,126 +81,178 @@ fun BlurredImageBackground(
             }
         },
         onError = {
-            it.result.throwable.printStackTrace()
+            imageLoadResult = Result.failure(it.result.throwable)
         }
     )
 
     Box(modifier = modifier.fillMaxSize()) {
-
-        // 🔹 Static blurred image background with hardcoded height
-        Image(
-            painter = painter,
-            contentDescription = stringResource(Res.string.anime_cover),
-            contentScale = ContentScale.Crop,
+        // Background gradient overlay
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
-                .blur(20.dp)
-                .background(DarkBlue)
-        )
-
-        // 🔹 Scrollable foreground content
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .height(350.dp)
         ) {
-            // Spacer to push content below the background image
-            Spacer(modifier = Modifier.height(200.dp)) // adjust to overlap partially
+            // Blurred image background
+            Image(
+                painter = painter,
+                contentDescription = stringResource(Res.string.anime_cover),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(16.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f))
+            )
 
+            // Gradient overlay for better text visibility
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(DesertWhite)
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                MaterialTheme.colorScheme.surface
+                            ),
+                            startY = 0f,
+                            endY = 350f
+                        )
+                    )
+            )
+        }
+
+        // Main content
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Space for the header area
+            Spacer(modifier = Modifier.height(200.dp))
+
+            // Main content container
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                shadowElevation = 8.dp,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    ElevatedCard(
-                        modifier = Modifier
-                            .height(230.dp)
-                            .aspectRatio(2 / 3f)
-                            .offset(y = (-115).dp),
-                        shape = RoundedCornerShape(8.dp),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 15.dp
-                        )
-                    ) {
-                        AnimatedContent(targetState = imageLoadResult) { result ->
-                            when (result) {
-                                null -> Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    PulseAnimation(modifier = Modifier.size(60.dp))
-                                }
 
-                                else -> {
-                                    Box {
-                                        Image(
-                                            painter = if (result.isSuccess) painter else {
-                                                painterResource(Res.drawable.anime_error_2)
-                                            },
-                                            contentDescription = stringResource(Res.string.anime_cover),
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Transparent),
-                                            contentScale = if (result.isSuccess) {
-                                                ContentScale.Crop
-                                            } else {
-                                                ContentScale.Fit
-                                            }
-                                        )
 
-                                        IconButton(
-                                            onClick = onFavoriteClick,
-                                            modifier = Modifier
-                                                .align(Alignment.BottomEnd)
-                                                .background(
-                                                    brush = Brush.radialGradient(
-                                                        colors = listOf(
-                                                            SandYellow, Color.Transparent
-                                                        ),
-                                                        radius = 70f
-                                                    )
-                                                )
-                                        ) {
-                                            Icon(
-                                                imageVector = if (isFavorite) {
-                                                    Icons.Filled.Favorite
-                                                } else {
-                                                    Icons.Outlined.FavoriteBorder
-                                                },
-                                                tint = Color.Red,
-                                                contentDescription = if (isFavorite) {
-                                                    stringResource(Res.string.remove_from_favorites)
-                                                } else {
-                                                    stringResource(Res.string.mark_as_favorite)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Call user-defined content below card
+                    // User-defined content
                     content()
                 }
             }
         }
 
-        // 🔹 Back button on top
+        // Cover image card
+        Box(
+            contentAlignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(y = 80.dp)
+        ) {
+            ElevatedCard(
+                modifier = Modifier
+                    .height(230.dp)
+                    .aspectRatio(2 / 3f),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 12.dp
+                )
+            ) {
+                AnimatedContent(
+                    targetState = imageLoadResult,
+                    transitionSpec = {
+                        fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                    }
+                ) { result ->
+                    when (result) {
+                        null -> Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            PulseAnimation(modifier = Modifier.size(60.dp))
+                        }
+
+                        else -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                // Main image
+                                Image(
+                                    painter = if (result.isSuccess) painter else {
+                                        painterResource(Res.drawable.anime_error_2)
+                                    },
+                                    contentDescription = stringResource(Res.string.anime_cover),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(16.dp)),
+                                    contentScale = if (result.isSuccess) {
+                                        ContentScale.Crop
+                                    } else {
+                                        ContentScale.Fit
+                                    }
+                                )
+
+                                // Favorite button with improved styling
+                                IconButton(
+                                    onClick = onFavoriteClick,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp)
+                                        .shadow(4.dp, CircleShape)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                            shape = CircleShape
+                                        )
+                                        .size(36.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isFavorite) {
+                                            Icons.Filled.Favorite
+                                        } else {
+                                            Icons.Filled.FavoriteBorder
+                                        },
+                                        tint = if (isFavorite)
+                                            MaterialTheme.colorScheme.error
+                                        else
+                                            MaterialTheme.colorScheme.onSurface,
+                                        contentDescription = if (isFavorite) {
+                                            stringResource(Res.string.remove_from_favorites)
+                                        } else {
+                                            stringResource(Res.string.mark_as_favorite)
+                                        },
+                                        modifier = Modifier.scale(0.8f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Back button with improved visibility
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 16.dp, start = 16.dp)
                 .statusBarsPadding()
+                .padding(16.dp)
+                .shadow(4.dp, CircleShape)
+                .background(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    shape = CircleShape
+                )
+                .size(40.dp)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(Res.string.go_back),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }

@@ -1,22 +1,22 @@
 package com.zkylab.anime.anime.presentation.anime_list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -28,9 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cmp_anime.composeapp.generated.resources.Res
@@ -41,9 +39,8 @@ import cmp_anime.composeapp.generated.resources.search_results
 import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.presentation.anime_list.components.AnimeList
 import com.zkylab.anime.anime.presentation.anime_list.components.AnimeSearchBar
-import com.zkylab.anime.core.presentation.DarkBlue
-import com.zkylab.anime.core.presentation.DesertWhite
-import com.zkylab.anime.core.presentation.SandYellow
+import com.zkylab.anime.anime.presentation.anime_list.components.EmptyStateMessage
+import com.zkylab.anime.anime.presentation.anime_list.components.ErrorMessage
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -91,144 +88,162 @@ fun AnimeListScreen(
         onAction(AnimeListAction.OnTabSelected(pagerState.currentPage))
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().background(DarkBlue).statusBarsPadding()
-    ) {
-        AnimeSearchBar(
-            searchQuery = state.searchQuery,
-            onSearchQueryChange = {
-                onAction(AnimeListAction.OnSearchQueryChange(it))
-            },
-            onImeSearch = {
-                keyboardController?.hide()
-            },
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-        Surface(
-            color = DesertWhite,
-            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-            modifier = Modifier.weight(1f).fillMaxWidth()
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        topBar = {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp,
+                shadowElevation = 2.dp
             ) {
-                TabRow(
-                    selectedTabIndex = state.selectedTabIndex,
-                    containerColor = DesertWhite,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            color = SandYellow,
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[state.selectedTabIndex])
-                        )
-                    },
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .widthIn(max = 700.dp)
                         .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(vertical = 8.dp)
                 ) {
-                    Tab(
-                        selected = state.selectedTabIndex == 0,
-                        onClick = {
-                            onAction(AnimeListAction.OnTabSelected(0))
+                    Text(
+                        text = "Anime Explorer",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    AnimeSearchBar(
+                        searchQuery = state.searchQuery,
+                        onSearchQueryChange = {
+                            onAction(AnimeListAction.OnSearchQueryChange(it))
                         },
-                        selectedContentColor = SandYellow,
-                        unselectedContentColor = Color.Black.copy(alpha = 0.5f),
-                        modifier = Modifier.weight(1f)
-                    ) {
+                        onImeSearch = {
+                            keyboardController?.hide()
+                        },
+                        modifier = Modifier
+                            .widthIn(max = 600.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            TabRow(
+                selectedTabIndex = state.selectedTabIndex,
+                containerColor = MaterialTheme.colorScheme.surface,
+                indicator = { tabPositions ->
+                    TabRowDefaults.PrimaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[state.selectedTabIndex]),
+                        width = 40.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            ) {
+                Tab(
+                    selected = state.selectedTabIndex == 0,
+                    onClick = { onAction(AnimeListAction.OnTabSelected(0)) },
+                    text = {
                         Text(
                             text = stringResource(Res.string.search_results),
-                            modifier = Modifier.padding(vertical = 12.dp)
+                            style = MaterialTheme.typography.titleSmall
                         )
-                    }
-                    Tab(
-                        selected = state.selectedTabIndex == 1,
-                        onClick = {
-                            onAction(AnimeListAction.OnTabSelected(1))
-                        },
-                        selectedContentColor = SandYellow,
-                        unselectedContentColor = Color.Black.copy(alpha = 0.5f),
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Tab(
+                    selected = state.selectedTabIndex == 1,
+                    onClick = { onAction(AnimeListAction.OnTabSelected(1)) },
+                    text = {
                         Text(
                             text = stringResource(Res.string.favorites),
-                            modifier = Modifier.padding(vertical = 12.dp)
+                            style = MaterialTheme.typography.titleSmall
                         )
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxWidth().weight(1f)
-                ) { pageIndex ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        when (pageIndex) {
-                            0 -> {
-                                if (state.isLoading) {
-                                    CircularProgressIndicator()
-                                } else {
-                                    when {
-                                        state.errorMessage != null -> {
-                                            Text(
-                                                text = state.errorMessage.asString(),
-                                                textAlign = TextAlign.Center,
-                                                style = MaterialTheme.typography.headlineSmall,
-                                                color = MaterialTheme.colorScheme.error
-                                            )
-                                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
-                                        state.searchResults.isEmpty() -> {
-                                            Text(
-                                                text = stringResource(Res.string.no_search_results),
-                                                textAlign = TextAlign.Center,
-                                                style = MaterialTheme.typography.headlineSmall,
-                                                color = MaterialTheme.colorScheme.error
-                                            )
-                                        }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { pageIndex ->
+                when (pageIndex) {
+                    0 -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    strokeWidth = 3.dp
+                                )
+                            } else {
+                                when {
+                                    state.errorMessage != null -> {
+                                        ErrorMessage(
+                                            message = state.errorMessage.asString(),
+                                            onRetry = { onAction(AnimeListAction.LoadMore) }
+                                        )
+                                    }
 
-                                        else -> {
-                                            AnimeList(
-                                                anime = state.searchResults,
-                                                onAnimeClick = {
-                                                    onAction(
-                                                        AnimeListAction.OnAnimeClick(
-                                                            it
-                                                        )
-                                                    )
-                                                },
-                                                scrollState = searchResultsListState,
-                                                onLoadMore = { onAction(AnimeListAction.LoadMore) },
-                                                isLoadingMore = state.isLoadingMore,
-                                                modifier = Modifier.fillMaxSize(),
-                                            )
-                                        }
+                                    state.searchResults.isEmpty() -> {
+                                        EmptyStateMessage(
+                                            message = stringResource(Res.string.no_search_results),
+                                            icon = Icons.Default.Search
+                                        )
+                                    }
+
+                                    else -> {
+                                        AnimeList(
+                                            anime = state.searchResults,
+                                            onAnimeClick = { onAction(AnimeListAction.OnAnimeClick(it)) },
+                                            scrollState = searchResultsListState,
+                                            onLoadMore = { onAction(AnimeListAction.LoadMore) },
+                                            isLoadingMore = state.isLoadingMore,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            1 -> {
-                                if (state.favoriteAnime.isEmpty()) {
-                                    Text(
-                                        text = stringResource(Res.string.no_favorite_anime),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.headlineSmall,
-                                    )
-                                } else {
-                                    AnimeList(
-                                        anime = state.favoriteAnime,
-                                        onAnimeClick = {
-                                            onAction(AnimeListAction.OnAnimeClick(it))
-                                        },
-                                        modifier = Modifier.fillMaxSize(),
-                                        scrollState = favoriteAnimeListState
-                                    )
-                                }
+                    1 -> {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            if (state.favoriteAnime.isEmpty()) {
+                                EmptyStateMessage(
+                                    message = stringResource(Res.string.no_favorite_anime),
+                                    icon = Icons.Default.Favorite
+                                )
+                            } else {
+                                AnimeList(
+                                    anime = state.favoriteAnime,
+                                    onAnimeClick = { onAction(AnimeListAction.OnAnimeClick(it)) },
+                                    scrollState = favoriteAnimeListState,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
                         }
                     }

@@ -1,19 +1,17 @@
 package com.zkylab.anime.anime.presentation.anime_detail.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.zkylab.anime.core.presentation.LightBlue
 
 enum class ChipSize {
     SMALL, REGULAR
@@ -25,7 +23,9 @@ fun AnimeChip(
     size: ChipSize = ChipSize.REGULAR,
     chipContent: @Composable RowScope.() -> Unit
 ) {
-    Box(
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(16.dp),
         modifier = modifier
             .widthIn(
                 min = when(size) {
@@ -33,17 +33,20 @@ fun AnimeChip(
                     ChipSize.REGULAR -> 80.dp
                 }
             )
-            .clip(RoundedCornerShape(16.dp))
-            .background(LightBlue)
-            .padding(
-                vertical = 8.dp,
-                horizontal = 12.dp
-            ),
-        contentAlignment = Alignment.Center
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(
+                vertical = when(size) {
+                    ChipSize.SMALL -> 6.dp
+                    ChipSize.REGULAR -> 8.dp
+                },
+                horizontal = when(size) {
+                    ChipSize.SMALL -> 10.dp
+                    ChipSize.REGULAR -> 12.dp
+                }
+            )
         ) {
             chipContent()
         }

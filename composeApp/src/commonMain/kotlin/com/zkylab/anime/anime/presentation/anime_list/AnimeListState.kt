@@ -4,10 +4,10 @@ import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.core.presentation.UiText
 
 data class AnimeListState(
-    val searchQuery: String = "Naruto",
+    val searchQuery: String = "",
     val searchResults: List<Anime> = emptyList(),
     val favoriteAnime: List<Anime> = emptyList(),
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val selectedTabIndex: Int = 0,
     val hasNextPage: Boolean = false,
     val errorMessage: UiText? = null,

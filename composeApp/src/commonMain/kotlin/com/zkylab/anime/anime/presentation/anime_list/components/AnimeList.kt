@@ -2,6 +2,7 @@ package com.zkylab.anime.anime.presentation.anime_list.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -28,14 +29,22 @@ fun AnimeList(
     LazyColumn(
         modifier = modifier,
         state = scrollState,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(
+            top = 16.dp,
+            bottom = 24.dp,
+            start = 16.dp,
+            end = 16.dp
+        )
     ) {
         items(anime.size) { index ->
             val item = anime[index]
             AnimeListItem(
                 anime = item,
-                modifier = Modifier.widthIn(max = 700.dp).fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .widthIn(max = 700.dp)
+                    .fillMaxWidth(),
                 onClick = { onAnimeClick(item) }
             )
 

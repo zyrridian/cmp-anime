@@ -1,12 +1,8 @@
 package com.zkylab.anime.anime.presentation.anime_detail.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,51 +29,62 @@ fun CharacterCard(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .width(180.dp)
+            .border(
+                width = 1.dp,
+                color = Color.LightGray.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .padding(bottom = 12.dp)
     ) {
+        // Character Image
         Box(
             modifier = Modifier
-                .size(width = 160.dp, height = 220.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray.copy(alpha = 0.4f),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                .fillMaxWidth()
+                .height(180.dp)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
         ) {
-            androidx.compose.foundation.Image(
+            Image(
                 painter = rememberAsyncImagePainter(characterImageUrl),
                 contentDescription = characterName,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.fillMaxSize()
             )
         }
 
+        // Character Name
         Text(
             text = characterName,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 6.dp).fillMaxWidth()
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 6.dp)
+                .fillMaxWidth()
         )
 
+        // Role
         Text(
             text = role,
-            style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
-            textAlign = TextAlign.Center
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        voiceActorName?.let {
-            Text(
-                text = "VA: $it",
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp).fillMaxWidth()
-            )
-        }
+        // Voice Actor
+        Text(
+            text = "VA: ${voiceActorName ?: "-"}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(top = 4.dp, start = 8.dp, end = 8.dp)
+                .fillMaxWidth()
+        )
     }
 }
