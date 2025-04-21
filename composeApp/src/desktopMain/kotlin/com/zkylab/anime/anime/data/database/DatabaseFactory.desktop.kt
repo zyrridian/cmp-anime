@@ -2,10 +2,11 @@ package com.zkylab.anime.anime.data.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.zkylab.anime.manga.data.database.FavoriteMangaDatabase
 import java.io.File
 
 actual class DatabaseFactory {
-    actual fun create(): RoomDatabase.Builder<FavoriteAnimeDatabase> {
+    actual fun create(): RoomDatabase.Builder<FavoriteMangaDatabase> {
         val os = System.getProperty("os.name").lowercase()
         val userHome = System.getProperty("user.home")
         val appDataDir = when {

@@ -3,6 +3,7 @@ package com.zkylab.anime.anime.data.network
 import com.zkylab.anime.anime.data.dto.AnimeCharacterResponseDto
 import com.zkylab.anime.anime.data.dto.AnimeRecommendationResponseDto
 import com.zkylab.anime.anime.data.dto.AnimeStaffResponseDto
+import com.zkylab.anime.anime.data.dto.AnimeTopResponseDto
 import com.zkylab.anime.core.data.safeCall
 import com.zkylab.anime.core.domain.DataError
 import com.zkylab.anime.core.domain.Result
@@ -64,4 +65,25 @@ class KtorRemoteAnimeDataSource(
             )
         }
     }
+
+    override suspend fun getTopAnime(
+        page: Int?,
+        limit: Int?,
+        type: String?,
+        filter: String?,
+        rating: String?,
+        sfw: Boolean?
+    ): Result<AnimeTopResponseDto, DataError.Remote> {
+        return safeCall {
+            httpClient.get("$BASE_URL/top/anime") {
+                page?.let { parameter("page", it) }
+                limit?.let { parameter("limit", it) }
+                type?.let { parameter("type", it) }
+                filter?.let { parameter("filter", it) }
+                rating?.let { parameter("rating", it) }
+                sfw?.let { parameter("sfw", it) }
+            }
+        }
+    }
+
 }

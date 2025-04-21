@@ -4,7 +4,6 @@ package com.zkylab.anime.anime.presentation.anime_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.domain.AnimeRepository
 import com.zkylab.anime.core.domain.onError
@@ -14,7 +13,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn

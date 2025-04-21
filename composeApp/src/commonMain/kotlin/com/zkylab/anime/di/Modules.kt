@@ -1,14 +1,15 @@
 package com.zkylab.anime.di
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.zkylab.anime.anime.data.database.DatabaseFactory
 import com.zkylab.anime.anime.data.database.FavoriteAnimeDatabase
+import com.zkylab.anime.anime.data.database.DatabaseFactory
 import com.zkylab.anime.anime.data.network.KtorRemoteAnimeDataSource
+import com.zkylab.anime.anime.data.repository.AnimeRepositoryImpl
 import com.zkylab.anime.anime.data.network.RemoteAnimeDataSource
-import com.zkylab.anime.anime.data.repository.DefaultAnimeRepository
 import com.zkylab.anime.anime.domain.AnimeRepository
-import com.zkylab.anime.anime.presentation.SelectedAnimeViewModel
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailViewModel
+import com.zkylab.anime.anime.presentation.SelectedAnimeViewModel
+import com.zkylab.anime.anime.presentation.home.HomeViewModel
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListViewModel
 import com.zkylab.anime.core.data.HttpClientFactory
 import org.koin.core.module.Module
@@ -22,7 +23,7 @@ expect val platformModule: Module
 val sharedModule = module {
     single { HttpClientFactory.create(get()) }
     singleOf(::KtorRemoteAnimeDataSource).bind<RemoteAnimeDataSource>()
-    singleOf(::DefaultAnimeRepository).bind<AnimeRepository>()
+    singleOf(::AnimeRepositoryImpl).bind<AnimeRepository>()
 
     single {
         get<DatabaseFactory>().create()
@@ -34,4 +35,5 @@ val sharedModule = module {
     viewModelOf(::AnimeListViewModel)
     viewModelOf(::AnimeDetailViewModel)
     viewModelOf(::SelectedAnimeViewModel)
+    viewModelOf(::HomeViewModel)
 }

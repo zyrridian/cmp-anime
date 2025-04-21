@@ -12,13 +12,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import com.zkylab.anime.anime.presentation.SelectedAnimeViewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailAction
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailScreenRoot
 import com.zkylab.anime.anime.presentation.anime_detail.AnimeDetailViewModel
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListScreenRoot
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListViewModel
+import com.zkylab.anime.anime.presentation.home.HomeScreenRoot
+import com.zkylab.anime.anime.presentation.home.HomeViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -38,22 +40,36 @@ fun App() {
                     popEnterTransition = { slideInHorizontally() }
                 ) {
                     val viewModel = koinViewModel<AnimeListViewModel>()
+                    val viewModelHome = koinViewModel<HomeViewModel>()
                     val selectedAnimeViewModel =
                         it.sharedKoinViewModel<SelectedAnimeViewModel>(navController)
 
                     LaunchedEffect(true) {
                         selectedAnimeViewModel.onSelectAnime(null)
                     }
-
-                    AnimeListScreenRoot(
-                        viewModel = viewModel,
+                    HomeScreenRoot(
+                        viewModel = viewModelHome,
                         onAnimeClick = { anime ->
-                            selectedAnimeViewModel.onSelectAnime(anime)
-                            navController.navigate(
-                                Route.AnimeDetail(anime.malId.toString())
-                            )
-                        }
+//                            selectedAnimeViewModel.onSelectAnime(anime)
+//                            navController.navigate(
+//                                Route.AnimeDetail(anime.malId.toString())
+//                            )
+                        },
+                        onViewAllAnimeClick = { },
+                        onViewAllMangaClick = { },
+                        onSearchClick = { },
+                        onFavoritesClick = { },
                     )
+
+//                    AnimeListScreenRoot(
+//                        viewModel = viewModel,
+//                        onAnimeClick = { anime ->
+//                            selectedMangaViewModel.onSelectAnime(anime)
+//                            navController.navigate(
+//                                Route.AnimeDetail(anime.malId.toString())
+//                            )
+//                        }
+//                    )
                 }
 
                 composable<Route.AnimeDetail>(

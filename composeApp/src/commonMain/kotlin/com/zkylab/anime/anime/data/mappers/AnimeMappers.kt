@@ -7,6 +7,7 @@ import com.zkylab.anime.anime.domain.AnimeCharacter
 import com.zkylab.anime.anime.domain.AnimePersonImages
 import com.zkylab.anime.anime.domain.AnimeRecommendation
 import com.zkylab.anime.anime.domain.AnimeStaff
+import com.zkylab.anime.anime.domain.AnimeTop
 import com.zkylab.anime.anime.domain.AnimeVoiceActor
 
 // ----------------------------
@@ -142,5 +143,26 @@ fun AnimeStaffDto.toDomain(): AnimeStaff? {
 fun AnimePersonDto.toPersonImages(): AnimePersonImages {
     return AnimePersonImages(
         imageUrl = images?.jpg?.imageUrl.orEmpty()
+    )
+}
+
+fun AnimeTopDto.toDomain(): AnimeTop? {
+    val malId = malId ?: return null
+    val title = title ?: return null
+
+    return AnimeTop(
+        malId = malId,
+        title = title,
+        imageUrl = images?.jpg?.imageUrl,
+        score = score,
+        type = type,
+        episodes = episodes,
+        rank = rank,
+        popularity = popularity,
+        synopsis = synopsis,
+        status = status,
+        aired = aired?.prop?.string,
+        genres = genres?.mapNotNull { it.name } ?: emptyList(),
+        studios = studios?.mapNotNull { it.name } ?: emptyList()
     )
 }

@@ -91,6 +91,9 @@ kotlin {
 
             implementation(libs.bundles.ktor)
             implementation(libs.bundles.coil)
+
+            implementation("com.google.accompanist:accompanist-pager:0.32.0")
+            implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
         }
         desktopMain.dependencies {
             implementation(compose. desktop.currentOs)

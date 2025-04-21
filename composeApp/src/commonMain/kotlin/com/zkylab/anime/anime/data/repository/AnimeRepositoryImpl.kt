@@ -2,6 +2,7 @@ package com.zkylab.anime.anime.data.repository
 
 import androidx.sqlite.SQLiteException
 import com.zkylab.anime.anime.data.database.FavoriteAnimeDao
+import com.zkylab.anime.anime.data.dto.AnimeTopResponseDto
 import com.zkylab.anime.anime.data.mappers.toAnime
 import com.zkylab.anime.anime.data.mappers.toAnimeEntity
 import com.zkylab.anime.anime.data.mappers.toDomain
@@ -19,7 +20,7 @@ import com.zkylab.anime.core.domain.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class DefaultAnimeRepository(
+class AnimeRepositoryImpl(
     private val remoteAnimeDataSource: RemoteAnimeDataSource,
     private val favoriteAnimeDao: FavoriteAnimeDao
 ) : AnimeRepository {
@@ -77,6 +78,24 @@ class DefaultAnimeRepository(
                     ?.mapNotNull { it.toDomain() }
                     ?: emptyList()
             }
+    }
+
+    override suspend fun getTopAnime(
+        page: Int?,
+        limit: Int?,
+        type: String?,
+        filter: String?,
+        rating: String?,
+        sfw: Boolean?
+    ): Result<AnimeTopResponseDto, DataError.Remote> {
+        return remoteAnimeDataSource.getTopAnime(
+            page = page,
+            limit = limit,
+            type = type,
+            filter = filter,
+            rating = rating,
+            sfw = sfw
+        )
     }
 
     override fun getFavoriteAnime(): Flow<List<Anime>> {

@@ -359,11 +359,11 @@ private fun AnimeDetailContent(
             state.staff?.let { staffList ->
                 if (staffList.isNotEmpty()) {
                     LazyRow(
-                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(top = 0.dp, bottom = 8.dp)
                     ) {
                         items(staffList) { staff ->
                             StaffCard(

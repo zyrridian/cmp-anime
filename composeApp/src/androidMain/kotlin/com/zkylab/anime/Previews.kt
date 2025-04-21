@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.zkylab.anime.anime.domain.Anime
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListScreen
 import com.zkylab.anime.anime.presentation.anime_list.AnimeListState
 import com.zkylab.anime.anime.presentation.anime_list.components.AnimeSearchBar
@@ -31,24 +30,24 @@ private fun BookSearchBarPreview() {
     }
 }
 
-private val anime = (1..100).map {
-    Anime(
-        malId = 1,
-        title = "1",
-        imageUrl = "1",
-        synopsis = "TODO()",
-        score = 1.2,
-        type = "a",
-        rank = 1,
-        popularity = 1,
-        episodes = 1,
-        duration = "a",
-        status = "a",
-        aired = "a",
-        studios = listOf("", ""),
-        genres = listOf("", "")
-    )
-}
+//private val anime = (1..100).map {
+//    Anime(
+//        malId = 1,
+//        title = "1",
+//        imageUrl = "1",
+//        synopsis = "TODO()",
+//        score = 1.2,
+//        type = "a",
+//        rank = 1,
+//        popularity = 1,
+//        episodes = 1,
+//        duration = "a",
+//        status = "a",
+//        aired = "a",
+//        studios = listOf("", ""),
+//        genres = listOf("", "")
+//    )
+//}
 
 //@Preview
 //@Composable
